@@ -1,7 +1,7 @@
 import { Board, BoundingBox, Point } from "./types";
 
-export const isInBox = (point: Point, box: BoundingBox): boolean => {
-  const allowedMargin = 20;
+export const isInBox = (point: Point, box: BoundingBox, allowMargin: boolean = true): boolean => {
+  const allowedMargin = allowMargin ? 10 : 0;
   const normalizedBox = normalizeBoxCoords(box);
   return (point.x >= normalizedBox.startX - allowedMargin) && (point.x <= normalizedBox.endX + allowedMargin) &&
     (point.y <= normalizedBox.endY + allowedMargin) && (point.y >= normalizedBox.startY - allowedMargin);
@@ -12,15 +12,16 @@ export const isInBoxCorners = (point: Point, box: BoundingBox): boolean => {
 };
 
 export const getOverlappedCorner = (point: Point, box: BoundingBox): string | null => {
-  const allowedMargin = 20;
-  if ((Math.abs(point.x - box.startX) + Math.abs(point.y - box.startY)) < allowedMargin) return 'topLeft';
-  if ((Math.abs(point.x - box.endX) + Math.abs(point.y - box.startY)) < allowedMargin) return 'topRight';
-  if ((Math.abs(point.x - box.startX) + Math.abs(point.y - box.endY)) < allowedMargin) return 'bottomLeft';
-  if ((Math.abs(point.x - box.endX) + Math.abs(point.y - box.endY)) < allowedMargin) return 'bottomRight';
-  if ((Math.abs(point.x - box.startX) < allowedMargin) && point.y < box.endY && point.y > box.startY)  return 'left';
-  if ((Math.abs(point.x - box.endX) < allowedMargin) && point.y < box.endY && point.y > box.startY)  return 'right';
-  if ((Math.abs(point.y - box.startY) < allowedMargin) && point.x < box.endX && point.x > box.startX)  return 'top';
-  if ((Math.abs(point.y - box.endY) < allowedMargin) && point.x < box.endX && point.x > box.startX)  return 'bottom';
+  const sideMargin = 10;
+  const cornerMargin = 20;
+  if ((Math.abs(point.x - box.startX) + Math.abs(point.y - box.startY)) < cornerMargin) return 'topLeft';
+  if ((Math.abs(point.x - box.endX) + Math.abs(point.y - box.startY)) < cornerMargin) return 'topRight';
+  if ((Math.abs(point.x - box.startX) + Math.abs(point.y - box.endY)) < cornerMargin) return 'bottomLeft';
+  if ((Math.abs(point.x - box.endX) + Math.abs(point.y - box.endY)) < cornerMargin) return 'bottomRight';
+  if ((Math.abs(point.x - box.startX) < sideMargin) && point.y < box.endY && point.y > box.startY)  return 'left';
+  if ((Math.abs(point.x - box.endX) < sideMargin) && point.y < box.endY && point.y > box.startY)  return 'right';
+  if ((Math.abs(point.y - box.startY) < sideMargin) && point.x < box.endX && point.x > box.startX)  return 'top';
+  if ((Math.abs(point.y - box.endY) < sideMargin) && point.x < box.endX && point.x > box.startX)  return 'bottom';
   return null;
 };
 

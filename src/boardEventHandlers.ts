@@ -99,7 +99,7 @@ const getCursorStyle = (board: Board, cursorLocation: Point): string => {
     throw Error('invalid overlapped corner');
   }
 
-  if (isInBox(cursorLocation, selectedBox)) return 'move';
+  if (isInBox(cursorLocation, selectedBox, false)) return 'move';
 
   return 'default';
 };
