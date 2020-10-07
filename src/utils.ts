@@ -1,16 +1,10 @@
-import { Board, BoundingBox, Point, Sides } from "./types";
-
-const getSides = (box: BoundingBox): Sides => {
-  const [left, right] = [box.startX, box.startX + box.width].sort((a, b) => a - b);
-  const [top, bottom] = [box.startY, box.startY + box.height].sort((a, b) => a - b);
-  return { left, right, bottom, top };
-}
+import { Board, BoundingBox, Point } from "./types";
 
 export const isInBox = (point: Point, box: BoundingBox): boolean => {
-  const sides = getSides(box);
   const allowedMargin = 20;
-  return (point.x >= sides.left - allowedMargin) && (point.x <= sides.right + allowedMargin) &&
-    (point.y <= sides.bottom + allowedMargin) && (point.y >= sides.top - allowedMargin);
+  const normalizedBox = normalizeBoxCoords(box);
+  return (point.x >= normalizedBox.startX - allowedMargin) && (point.x <= normalizedBox.endX + allowedMargin) &&
+    (point.y <= normalizedBox.endY + allowedMargin) && (point.y >= normalizedBox.startY - allowedMargin);
 };
 
 export const isInBoxCorners = (point: Point, box: BoundingBox): boolean => {
@@ -18,28 +12,27 @@ export const isInBoxCorners = (point: Point, box: BoundingBox): boolean => {
 };
 
 export const getOverlappedCorner = (point: Point, box: BoundingBox): string | null => {
-  const sides = getSides(box);
   const allowedMargin = 20;
-  if ((Math.abs(point.x - sides.left) + Math.abs(point.y - sides.top)) < allowedMargin) return 'topLeft';
-  if ((Math.abs(point.x - sides.right) + Math.abs(point.y - sides.top)) < allowedMargin) return 'topRight';
-  if ((Math.abs(point.x - sides.left) + Math.abs(point.y - sides.bottom)) < allowedMargin) return 'bottomLeft';
-  if ((Math.abs(point.x - sides.right) + Math.abs(point.y - sides.bottom)) < allowedMargin) return 'bottomRight';
-  if ((Math.abs(point.x - sides.left) < allowedMargin) && point.y < sides.bottom && point.y > sides.top)  return 'left';
-  if ((Math.abs(point.x - sides.right) < allowedMargin) && point.y < sides.bottom && point.y > sides.top)  return 'right';
-  if ((Math.abs(point.y - sides.top) < allowedMargin) && point.x < sides.right && point.x > sides.left)  return 'top';
-  if ((Math.abs(point.y - sides.bottom) < allowedMargin) && point.x < sides.right && point.x > sides.left)  return 'bottom';
+  if ((Math.abs(point.x - box.startX) + Math.abs(point.y - box.startY)) < allowedMargin) return 'topLeft';
+  if ((Math.abs(point.x - box.endX) + Math.abs(point.y - box.startY)) < allowedMargin) return 'topRight';
+  if ((Math.abs(point.x - box.startX) + Math.abs(point.y - box.endY)) < allowedMargin) return 'bottomLeft';
+  if ((Math.abs(point.x - box.endX) + Math.abs(point.y - box.endY)) < allowedMargin) return 'bottomRight';
+  if ((Math.abs(point.x - box.startX) < allowedMargin) && point.y < box.endY && point.y > box.startY)  return 'left';
+  if ((Math.abs(point.x - box.endX) < allowedMargin) && point.y < box.endY && point.y > box.startY)  return 'right';
+  if ((Math.abs(point.y - box.startY) < allowedMargin) && point.x < box.endX && point.x > box.startX)  return 'top';
+  if ((Math.abs(point.y - box.endY) < allowedMargin) && point.x < box.endX && point.x > box.startX)  return 'bottom';
   return null;
 };
 
 export const normalizeBoxCoords = (box: BoundingBox): BoundingBox => {
   const normalized = {...box};
-  if (normalized.width < 0) {
-    normalized.startX += normalized.width;
-    normalized.width = -normalized.width;
+  if (box.startX > box.endX) {
+    normalized.startX = box.endX;
+    normalized.endX = box.startX
   }
-  if (normalized.height < 0) {
-    normalized.startY += normalized.height;
-    normalized.height = -normalized.height
+  if (box.startY > box.endY) {
+    normalized.startY = box.endY;
+    normalized.endY = box.startY;
   }
   return normalized;
 };
@@ -54,14 +47,14 @@ export const stickPointToGrid = (point: Point): Point => {
 
 const stickBoxToGrid = (_: Object, __: string, descriptor: TypedPropertyDescriptor<any>) => {
   const originalMethod = descriptor.value;
-  descriptor.value = (...args: any) => {
+  descriptor.value = (...args: any): BoundingBox => {
     let box = originalMethod(...args);
     let result = {
       ...box,
       startX: Math.round(box.startX / 10) * 10,
       startY: Math.round(box.startY / 10) * 10,
-      width: Math.round(box.width / 10) * 10,
-      height: Math.round(box.height / 10) * 10
+      endX: Math.round(box.endX / 10) * 10,
+      endY: Math.round(box.endY / 10) * 10
     };
     return result
   };
@@ -76,50 +69,44 @@ export class BoxMover {
           ...box,
           startX: newCorner.x,
           startY: newCorner.y,
-          width: box.width + box.startX - newCorner.x,
-          height: box.height + box.startY - newCorner.y
         };
       case 'topRight':
         return {
           ...box,
           startY: newCorner.y,
-          width: newCorner.x - box.startX,
-          height: box.height + box.startY - newCorner.y
+          endX: newCorner.x
         };
       case 'bottomRight':
         return {
           ...box,
-          width: newCorner.x - box.startX,
-          height: newCorner.y - box.startY,
+          endX: newCorner.x,
+          endY: newCorner.y
         };
       case 'bottomLeft':
         return {
           ...box,
           startX: newCorner.x,
-          width: box.width + box.startX - newCorner.x,
-          height: newCorner.y - box.startY
+          endY: newCorner.y
         };
       case 'left':
         return {
           ...box,
           startX: newCorner.x,
-          width: box.width + box.startX - newCorner.x
         };
       case 'right':
         return {
           ...box,
-          width: newCorner.x - box.startX
+          endX: newCorner.x
         };
       case 'top':
         return {
           ...box,
           startY: newCorner.y,
-          height: box.height + box.startY - newCorner.y
         };
       case 'bottom':
         return {
           ...box,
-          height: newCorner.y - box.startY,
+          endY: newCorner.y
         };
       default:
         throw Error('invlaid corner')
@@ -131,7 +118,9 @@ export class BoxMover {
     return {
       ...box,
       startX: box.startX + point.x - movingStart.x,
+      endX: box.endX + point.x - movingStart.x,
       startY: box.startY + point.y - movingStart.y,
+      endY: box.endY + point.y - movingStart.y,
     };
   }
 }

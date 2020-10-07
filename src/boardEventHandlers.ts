@@ -12,8 +12,8 @@ const getNewBox = (startPoint: Point): BoundingBox => ({
   id: JSON.stringify(new Date()),
   startX: startPoint.x - 10,
   startY: startPoint.y - 10,
-  width: 10,
-  height: 10
+  endX: startPoint.x + 10,
+  endY: startPoint.y + 10
 });
 
 export const handleBoardClick = (board: Board, cursorLocation: Point): Board => {

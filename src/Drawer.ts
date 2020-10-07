@@ -11,31 +11,23 @@ const usePath = (_: Object, __: string, descriptor: TypedPropertyDescriptor<any>
   };
 };
 
+const prepareBoxForPainting = (box: BoundingBox) => {
+  return {
+    startX: box.startX,
+    startY: box.startY,
+    width: box.endX - box.startX,
+    height: box.endY - box.startY
+  }
+}
+
 export class Drawer {
   @usePath
   static drawBox(ctx: CanvasRenderingContext2D, box: BoundingBox) {
+    const preparedBox = prepareBoxForPainting(box);
     ctx.strokeStyle = BOX_COLOR;
     ctx.fillStyle = BOX_FILL_COLOR;
-    ctx.strokeRect(box.startX, box.startY, box.width, box.height);
-    ctx.fillRect(box.startX, box.startY, box.width, box.height);
-  }
-
-  @usePath
-  static drawCorners(ctx: CanvasRenderingContext2D, box: BoundingBox) {
-    ctx.strokeStyle = BOX_COLOR;
-    ctx.moveTo(box.startX, box.startY);
-    ctx.arc(box.startX, box.startY, CORNER_CIRCLE_RADIUS, 0, 2 * Math.PI);
-
-    ctx.moveTo(box.startX + box.width, box.startY);
-    ctx.arc(box.startX + box.width, box.startY, CORNER_CIRCLE_RADIUS, 0, 2 * Math.PI);
-
-    ctx.moveTo(box.startX + box.width, box.startY + box.height);
-    ctx.arc(box.startX + box.width, box.startY + box.height, CORNER_CIRCLE_RADIUS, 0, 2 * Math.PI);
-
-    ctx.moveTo(box.startX, box.startY + box.height);
-    ctx.arc(box.startX, box.startY + box.height, CORNER_CIRCLE_RADIUS, 0, 2 * Math.PI);
-
-    ctx.stroke();
+    ctx.strokeRect(preparedBox.startX, preparedBox.startY, preparedBox.width, preparedBox.height);
+    ctx.fillRect(preparedBox.startX, preparedBox.startY, preparedBox.width, preparedBox.height);
   }
 
   @usePath

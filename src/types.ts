@@ -1,10 +1,3 @@
-export interface Sides {
-  left: number,
-  right: number,
-  bottom: number,
-  top: number
-}
-
 export interface Point {
   x: number,
   y: number
@@ -13,9 +6,9 @@ export interface Point {
 export interface BoundingBox {
   id: string,
   startX: number,
+  endX: number,
   startY: number,
-  width: number,
-  height: number
+  endY: number
 };
 
 export interface Board {
