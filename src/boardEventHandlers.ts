@@ -4,9 +4,8 @@ import {
   getOverlappedCorner,
   getSelectedBox,
   isInBox,
-  moveBox,
-  moveBoxCorner,
-  normalizeBoxCoords
+  normalizeBoxCoords,
+  BoxMover
 } from "./utils";
 
 const getNewBox = (startPoint: Point): BoundingBox => ({
@@ -115,7 +114,7 @@ export const handleBoardMouseMove = (board: Board, movePoint: Point): Board => {
       ...board,
       boxes: board.boxes.map(b => {
         return b.id === board.selectedBoxId ?
-          moveBoxCorner(b, board.selectedBoxResizingCorner, movePoint) :
+          BoxMover.moveCorner(b, board.selectedBoxResizingCorner, movePoint) :
           b
       })
     };
@@ -125,7 +124,7 @@ export const handleBoardMouseMove = (board: Board, movePoint: Point): Board => {
       selectedBoxMovingStart: movePoint,
       boxes: board.boxes.map(b => {
         return b.id === board.selectedBoxId ?
-          moveBox(b, board.selectedBoxMovingStart, movePoint) :
+          BoxMover.moveBox(b, board.selectedBoxMovingStart, movePoint) :
           b
       })
     };
