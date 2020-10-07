@@ -8,12 +8,13 @@ import {
   BoxMover, stickPointToGrid
 } from "./utils";
 
-const getNewBox = (startPoint: Point): BoundingBox => ({
+const getNewBox = (): BoundingBox => ({
   id: JSON.stringify(new Date()),
-  startX: startPoint.x - 10,
-  startY: startPoint.y - 10,
-  endX: startPoint.x + 10,
-  endY: startPoint.y + 10
+  // TODO: get this windows out of here
+  startX: window.innerWidth / 2 - 100,
+  startY: window.innerHeight / 2 - 100,
+  endX: window.innerWidth / 2,
+  endY: window.innerHeight / 2
 });
 
 export const handleBoardClick = (board: Board, cursorLocation: Point): Board => {
@@ -52,19 +53,7 @@ export const handleBoardMouseUp = (board: Board, cursorLocation: Point): Board =
 export const handleBoardMouseDown = (board: Board, cursorLocation: Point): Board => {
   const clickedBox = getBoxUnderCursor(board, cursorLocation);
 
-  if (board.selectedBoxId === null) {
-    if (clickedBox === null ) {
-      const newBox = getNewBox(cursorLocation);
-      return {
-        ...board,
-        boxes: [...board.boxes, newBox],
-        selectedBoxId: newBox.id,
-        selectedBoxResizingCorner: 'bottomRight'
-      }
-    } else {
-      return board;
-    }
-  }
+  if (board.selectedBoxId === null) return board;
 
   if (clickedBox === null || clickedBox.id !== board.selectedBoxId) return board;
 
@@ -141,4 +130,11 @@ export const handleDeleteKey = (board: Board): Board => {
       selectedBoxMovingStart: null,
       selectedBoxResizingCorner: null
     };
+};
+
+export const spawnBox = (board: Board): Board => {
+  return {
+    ...board,
+    boxes: [...board.boxes, getNewBox()]
+  };
 };

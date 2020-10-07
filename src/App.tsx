@@ -1,8 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Board } from './types';
-import { getSelectedBox } from './utils';
 import { Drawer } from './Drawer';
-import { handleBoardClick, handleBoardMouseDown, handleBoardMouseMove, handleBoardMouseUp, handleDeleteKey } from './boardEventHandlers';
+import {
+  handleBoardClick,
+  handleBoardMouseDown,
+  handleBoardMouseMove,
+  handleBoardMouseUp,
+  handleDeleteKey,
+  spawnBox
+} from './boardEventHandlers';
 
 const EMPTY_BOARD: Board = {
   boxes: [],
@@ -65,9 +71,18 @@ export const App: React.FC = () => {
   }, [board]);
 
   return (
-    <canvas
-      width={window.innerWidth}
-      height={window.innerHeight}
-      ref={canvasRef} />
+    <>
+      <canvas
+        width={window.innerWidth}
+        height={window.innerHeight}
+        ref={canvasRef} />
+      <div style={{
+        position: "absolute",
+        top: "30px",
+        left: "30px"
+      }}>
+        <button onClick={() => setBoard(spawnBox(board))}>Spawn Box</button>
+      </div>
+    </>
   );
 }
