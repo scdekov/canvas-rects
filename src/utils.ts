@@ -44,6 +44,14 @@ export const normalizeBoxCoords = (box: BoundingBox): BoundingBox => {
   return normalized;
 };
 
+
+export const stickPointToGrid = (point: Point): Point => {
+  return {
+    x: Math.round(point.x / 10) * 10,
+    y: Math.round(point.y / 10) * 10
+  };
+};
+
 const stickBoxToGrid = (_: Object, __: string, descriptor: TypedPropertyDescriptor<any>) => {
   const originalMethod = descriptor.value;
   descriptor.value = (...args: any) => {

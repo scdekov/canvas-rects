@@ -5,7 +5,7 @@ import {
   getSelectedBox,
   isInBox,
   normalizeBoxCoords,
-  BoxMover
+  BoxMover, stickPointToGrid
 } from "./utils";
 
 const getNewBox = (startPoint: Point): BoundingBox => ({
@@ -121,7 +121,7 @@ export const handleBoardMouseMove = (board: Board, movePoint: Point): Board => {
   } else if (board.selectedBoxMovingStart) {
     return {
       ...board,
-      selectedBoxMovingStart: movePoint,
+      selectedBoxMovingStart: stickPointToGrid(movePoint),
       boxes: board.boxes.map(b => {
         return b.id === board.selectedBoxId ?
           BoxMover.moveBox(b, board.selectedBoxMovingStart, movePoint) :
