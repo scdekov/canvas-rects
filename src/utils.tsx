@@ -1,4 +1,4 @@
-import { BoundingBox, Point, Sides } from "./types";
+import { Board, BoundingBox, Point, Sides } from "./types";
 
 const getSides = (box: BoundingBox): Sides => {
   const [left, right] = [box.startX, box.startX + box.width].sort((a, b) => a - b);
@@ -81,4 +81,9 @@ export const moveBox = (box: BoundingBox, movingStart: Point, point: Point) => {
     startY: box.startY + point.y - movingStart.y,
     movingStart: point,
   };
+};
+
+export const getSelectedBox = (board: Board): BoundingBox | null => {
+  if (board.selectedBoxId === null) return null;
+  return board.boxes.find(b => b.id === board.selectedBoxId);
 };
