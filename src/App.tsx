@@ -28,6 +28,7 @@ export const App: React.FC = () => {
   };
 
   useEffect(() => {
+    document.body.style.overflow = 'hidden';
     window.addEventListener('click', e => {
       setBoard(handleBoardClick(boardRef.current, { x: e.pageX, y: e.pageY }));
     });
@@ -35,9 +36,17 @@ export const App: React.FC = () => {
     window.addEventListener('mouseup', e => {
       setBoard(handleBoardMouseUp(boardRef.current, { x: e.pageX, y: e.pageY }));
     });
+    window.addEventListener('touchend', e => {
+      if (e.targetTouches.length === 0) return;
+      setBoard(handleBoardMouseUp(boardRef.current, { x: e.changedTouches[0].pageX, y: e.changedTouches[0].pageY }));
+    });
 
     window.addEventListener('mousedown', e => {
       setBoard(handleBoardMouseDown(boardRef.current, { x: e.pageX, y: e.pageY }));
+    });
+    window.addEventListener('touchstart', e => {
+      if (e.targetTouches.length === 0) return;
+      setBoard(handleBoardMouseDown(boardRef.current, { x: e.targetTouches[0].pageX, y: e.targetTouches[0].pageY }));
     });
 
     window.addEventListener('keyup', e => {
