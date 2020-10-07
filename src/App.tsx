@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import './App.css';
-import { BoundingBox, Point } from './types';
+import { Board, BoundingBox, Point } from './types';
 import { getOverlappedCorner, isInBox, isInBoxCorners, moveBoxCorner, normalizeBoxCoords, moveBox } from './utils';
 import { Drawer } from './Drawer';
 import { API_URL, SYNC_INTERVAL_SECONDS } from './constants';
@@ -11,67 +11,81 @@ const getNewBox = (startPoint: Point): BoundingBox => ({
   startX: startPoint.x,
   startY: startPoint.y,
   width: 0,
-  height: 0,
-  resizingCorner: 'bottomRight',
-  movingStart: null
+  height: 0
 });
+
+const EMPTY_BOARD: Board = {
+  boxes: [],
+  selectedBoxId: null,
+  selectedBoxMovingStart: null,
+  selectedBoxResizingCorner: null
+}
 
 export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [allBoxes, _setAllBoxes] = useState<BoundingBox[]>([]);
-  const [selectedBox, _setSelectedBox] = useState<BoundingBox | null>(null);
-  const selectedBoxRef = useRef<BoundingBox | null>(null);
-  const allBoxesRef = useRef<BoundingBox[]>([]);
+  const [board, _setBoard] = useState<Board>(EMPTY_BOARD);
+  const boardRef = useRef<Board>(EMPTY_BOARD);
 
-  const setSelectedBox = (b: BoundingBox | null) => {
-    selectedBoxRef.current = b;
-    _setSelectedBox(b);
+  const setBoard = (b: Board) => {
+    boardRef.current = b;
+    _setBoard(b);
   };
 
-  const setAllBoxes = (b: BoundingBox[]) => {
-    allBoxesRef.current = b;
-    _setAllBoxes(b);
-  };
-
-  const onClick = (point: Point, selectedBox: BoundingBox | null, allBoxes: BoundingBox[]) => {
-    const clickedBox = [...allBoxes, selectedBox].find(box => box && isInBox(point, box));
+  const onClick = (point: Point, board: Board) => {
+    const clickedBox = board.boxes.find(box => isInBox(point, box));
+    const selectedBox = board.selectedBoxId && board.boxes.find(box => box.id === board.selectedBoxId) || null;
 
     if (selectedBox === null) {
       // no selected box => either select what's under the cursor or create new box
-      setSelectedBox(clickedBox || getNewBox(point));
       if (clickedBox) {
-        setAllBoxes(allBoxes.filter(b => b.id !== clickedBox.id));
+        setBoard({...board, selectedBoxId: clickedBox.id});
+      } else {
+        const newBox = getNewBox(point);
+        setBoard({
+          ...board,
+          boxes: [...board.boxes, newBox],
+          selectedBoxId: newBox.id,
+          selectedBoxResizingCorner: 'bottomRight'
+        })
       }
-    } else if (selectedBox.resizingCorner || selectedBox.movingStart) {
+    } else if (board.selectedBoxResizingCorner || board.selectedBoxMovingStart) {
       // just finished resizing or moving
       document.body.style.cursor = 'default';
-      setSelectedBox({
-        ...normalizeBoxCoords(selectedBox),
-        resizingCorner: null,
-        movingStart: null
-      });
+      setBoard({
+        ...board,
+        boxes: board.boxes.map(b => b.id === board.selectedBoxId ? normalizeBoxCoords(b) : b),
+        selectedBoxResizingCorner: null,
+        selectedBoxMovingStart: null
+      })
     } else if (isInBoxCorners(point, selectedBox)) {
       // clicked on corner => start resizing
-      setSelectedBox({
-        ...selectedBox,
-        resizingCorner: getOverlappedCorner(point, selectedBox)
+      setBoard({
+        ...board,
+        selectedBoxResizingCorner: getOverlappedCorner(point, selectedBox)
       });
     } else if (selectedBox.id === clickedBox?.id) {
       document.body.style.cursor = 'move';
-      setSelectedBox({
-        ...selectedBox,
-        movingStart: point
+      setBoard({
+        ...board,
+        selectedBoxMovingStart: point
       })
     } else {
-      setAllBoxes([...allBoxes, selectedBox]);
-      setSelectedBox(clickedBox || null);
+      setBoard({
+        ...board,
+        selectedBoxId: clickedBox?.id || null
+      });
     }
   }
 
-  const deleteSelectedBox = () => {
-    setAllBoxes(allBoxesRef.current.filter(b => b.id !== selectedBoxRef.current?.id));
-    setSelectedBox(null);
-  };
+  const deleteSelectedBox = (board: Board) => {
+    setBoard({
+      ...board,
+      boxes: board.boxes.filter(b => b.id !== board.selectedBoxId),
+      selectedBoxId: null,
+      selectedBoxMovingStart: null,
+      selectedBoxResizingCorner: null
+    });
+  }
 
   useEffect(() => {
     if (!canvasRef.current) {
@@ -81,27 +95,42 @@ export const App: React.FC = () => {
     const canvas = canvasRef.current;
 
     canvas.addEventListener('click', e => {
-      onClick({ x: e.pageX, y: e.pageY }, selectedBoxRef.current, allBoxesRef.current);
+      const board = boardRef.current;
+      onClick({ x: e.pageX, y: e.pageY }, board);
     });
 
     window.addEventListener('keyup', e => {
-      if (e.key === 'Delete' && selectedBoxRef.current !== null) {
+      const board = boardRef.current;
+      if (e.key === 'Delete' && board.selectedBoxId !== null) {
         e.preventDefault();
-        deleteSelectedBox();
+        deleteSelectedBox(board);
       }
     })
 
     canvas.addEventListener('mousemove', e => {
-      if (selectedBoxRef.current === null) return;
+      const board = boardRef.current;
+      const mousePoint: Point = { x: e.pageX, y: e.pageY };
+      if (board.selectedBoxId === null) return;
 
-      if (selectedBoxRef.current.resizingCorner) {
-        setSelectedBox({
-          ...moveBoxCorner(selectedBoxRef.current, { x: e.pageX, y: e.pageY })
+      if (board.selectedBoxResizingCorner !== null) {
+        setBoard({
+          ...board,
+          boxes: board.boxes.map(b => {
+            return b.id === board.selectedBoxId ?
+                   moveBoxCorner(b, board.selectedBoxResizingCorner, mousePoint) :
+                   b
+          })
         });
-      } else if (selectedBoxRef.current.movingStart) {
+      } else if (board.selectedBoxMovingStart) {
         document.body.style.cursor = 'move';
-        setSelectedBox({
-          ...moveBox(selectedBoxRef.current, { x: e.pageX, y: e.pageY })
+        setBoard({
+          ...board,
+          selectedBoxMovingStart: mousePoint,
+          boxes: board.boxes.map(b => {
+            return b.id === board.selectedBoxId ?
+                   moveBox(b, board.selectedBoxMovingStart, mousePoint) :
+                   b
+          })
         });
       }
     })
@@ -115,17 +144,20 @@ export const App: React.FC = () => {
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
+      const selectedBox = board.selectedBoxId && board.boxes.find(box => box.id === board.selectedBoxId) || null;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.beginPath()
-      if (selectedBox) {
+
+      if (selectedBox !== null) {
         Drawer.drawBox(ctx, selectedBox);
         Drawer.drawCorners(ctx, selectedBox);
       }
-      allBoxes.forEach(box => {
+      board.boxes.forEach(box => {
         Drawer.drawBox(ctx, box);
       });
     }
-  }, [selectedBox, allBoxes]);
+  }, [board]);
 
   return (
     <canvas

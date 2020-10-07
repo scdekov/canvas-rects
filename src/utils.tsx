@@ -47,8 +47,8 @@ export const normalizeBoxCoords = (box: BoundingBox): BoundingBox => {
   return normalized;
 };
 
-export const moveBoxCorner = (box: BoundingBox, newCorner: Point): BoundingBox => {
-  switch (box.resizingCorner) {
+export const moveBoxCorner = (box: BoundingBox, resizingCorner: string, newCorner: Point): BoundingBox => {
+  switch (resizingCorner) {
     case 'topLeft':
       return {
         ...box,
@@ -78,16 +78,15 @@ export const moveBoxCorner = (box: BoundingBox, newCorner: Point): BoundingBox =
         height: newCorner.y - box.startY
       }
     default :
-      throw 'invlaid corner'
+      throw Error('invlaid corner')
   }
 };
 
-export const moveBox = (box: BoundingBox, point: Point) => {
-  if (box.movingStart === null) return box;
+export const moveBox = (box: BoundingBox, movingStart: Point, point: Point) => {
   return {
     ...box,
-    startX: box.startX + point.x - box.movingStart.x,
-    startY: box.startY + point.y - box.movingStart.y,
+    startX: box.startX + point.x - movingStart.x,
+    startY: box.startY + point.y - movingStart.y,
     movingStart: point,
   };
 };

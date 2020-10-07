@@ -8,7 +8,13 @@ export interface BoundingBox {
   startX: number,
   startY: number,
   width: number,
-  height: number,
-  resizingCorner: string | null,
-  movingStart: Point | null
+  height: number
 };
+
+export interface Board {
+  boxes: BoundingBox[],
+  selectedBoxId: string | null,
+
+  selectedBoxResizingCorner: string | null,
+  selectedBoxMovingStart: Point | null
+}
