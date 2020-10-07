@@ -28,7 +28,6 @@ export const handleBoardClick = (board: Board, clickPoint: Point): Board => {
     }
   } else if (board.selectedBoxResizingCorner || board.selectedBoxMovingStart) {
     // just finished resizing or moving
-    document.body.style.cursor = 'default';
     return {
       ...board,
       boxes: board.boxes.map(b => b.id === board.selectedBoxId ? normalizeBoxCoords(b) : b),
@@ -42,7 +41,6 @@ export const handleBoardClick = (board: Board, clickPoint: Point): Board => {
       selectedBoxResizingCorner: getOverlappedCorner(clickPoint, selectedBox)
     };
   } else if (selectedBox.id === clickedBox?.id) {
-    document.body.style.cursor = 'move';
     return {
       ...board,
       selectedBoxMovingStart: clickPoint
@@ -58,6 +56,8 @@ export const handleBoardClick = (board: Board, clickPoint: Point): Board => {
 export const handleBoardMouseMove = (board: Board, movePoint: Point): Board => {
   if (board.selectedBoxId === null) return board;
 
+  document.body.style.cursor = isInBox(movePoint, getSelectedBox(board)) ? 'move' : 'default';
+
   if (board.selectedBoxResizingCorner !== null) {
     return {
       ...board,
@@ -68,7 +68,6 @@ export const handleBoardMouseMove = (board: Board, movePoint: Point): Board => {
       })
     };
   } else if (board.selectedBoxMovingStart) {
-    document.body.style.cursor = 'move';
     return {
       ...board,
       selectedBoxMovingStart: movePoint,
