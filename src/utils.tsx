@@ -8,8 +8,8 @@ const getSides = (box: BoundingBox): Sides => {
 
 export const isInBox = (point: Point, box: BoundingBox): boolean => {
   const sides = getSides(box);
-  return (point.x > sides.left) && (point.x < sides.right) &&
-    (point.y < sides.bottom) && (point.y > sides.top);
+  return (point.x >= sides.left) && (point.x <= sides.right) &&
+    (point.y <= sides.bottom) && (point.y >= sides.top);
 };
 
 export const isInBoxCorners = (point: Point, box: BoundingBox): boolean => {

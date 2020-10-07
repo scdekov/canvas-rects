@@ -9,47 +9,69 @@ const getNewBox = (startPoint: Point): BoundingBox => ({
   height: 0
 });
 
-export const handleBoardClick = (board: Board, clickPoint: Point): Board => {
-  const clickedBox = board.boxes.find(box => isInBox(clickPoint, box));
+export const handleBoardClick = (board: Board, cursorLocation: Point): Board => {
+  const clickedBox = board.boxes.find(box => isInBox(cursorLocation, box));
   const selectedBox = getSelectedBox(board);
 
-  if (selectedBox === null) {
-    // no selected box => either select what's under the cursor or create new box
-    if (clickedBox) {
-      return { ...board, selectedBoxId: clickedBox.id };
-    } else {
-      const newBox = getNewBox(clickPoint);
+  if (selectedBox === null && clickedBox) return { ...board, selectedBoxId: clickedBox.id };
+  return board;
+};
+
+export const handleBoardMouseUp = (board: Board, cursorLocation: Point): Board => {
+  const clickedBox = board.boxes.find(box => isInBox(cursorLocation, box)) || null;
+  if (clickedBox === null) {
+    return {
+      ...board,
+      selectedBoxId: null
+    };
+  }
+
+  if (board.selectedBoxId === null) {
+    return {
+      ...board,
+      selectedBoxId: clickedBox.id
+    };
+  }
+
+  return {
+    ...board,
+    boxes: board.boxes.map(b => b.id === board.selectedBoxId ? normalizeBoxCoords(b) : b),
+    selectedBoxResizingCorner: null,
+    selectedBoxMovingStart: null
+  };
+};
+
+export const handleBoardMouseDown = (board: Board, cursorLocation: Point): Board => {
+  const clickedBox = board.boxes.find(box => isInBox(cursorLocation, box)) || null;
+
+  if (board.selectedBoxId === null) {
+    if (clickedBox === null ) {
+      const newBox = getNewBox(cursorLocation);
       return {
         ...board,
         boxes: [...board.boxes, newBox],
         selectedBoxId: newBox.id,
         selectedBoxResizingCorner: 'bottomRight'
       }
+    } else {
+      return board;
     }
-  } else if (board.selectedBoxResizingCorner || board.selectedBoxMovingStart) {
-    // just finished resizing or moving
-    return {
-      ...board,
-      boxes: board.boxes.map(b => b.id === board.selectedBoxId ? normalizeBoxCoords(b) : b),
-      selectedBoxResizingCorner: null,
-      selectedBoxMovingStart: null
-    }
-  } else if (isInBoxCorners(clickPoint, selectedBox)) {
+  }
+
+  if (clickedBox === null || clickedBox.id !== board.selectedBoxId) return board;
+
+  const selectedBox = getSelectedBox(board);
+  if (isInBoxCorners(cursorLocation, selectedBox)) {
     // clicked on corner => start resizing
     return {
       ...board,
-      selectedBoxResizingCorner: getOverlappedCorner(clickPoint, selectedBox)
+      selectedBoxResizingCorner: getOverlappedCorner(cursorLocation, selectedBox)
     };
-  } else if (selectedBox.id === clickedBox?.id) {
-    return {
-      ...board,
-      selectedBoxMovingStart: clickPoint
-    }
   } else {
     return {
       ...board,
-      selectedBoxId: clickedBox?.id || null
-    };
+      selectedBoxMovingStart: cursorLocation
+    }
   }
 };
 

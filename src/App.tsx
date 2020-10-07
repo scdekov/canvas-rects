@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Board } from './types';
 import { getSelectedBox } from './utils';
 import { Drawer } from './Drawer';
-import { handleBoardClick, handleBoardMouseMove, handleDeleteKey } from './boardEventHandlers';
+import { handleBoardClick, handleBoardMouseDown, handleBoardMouseMove, handleBoardMouseUp, handleDeleteKey } from './boardEventHandlers';
 
 const EMPTY_BOARD: Board = {
   boxes: [],
@@ -24,6 +24,14 @@ export const App: React.FC = () => {
   useEffect(() => {
     window.addEventListener('click', e => {
       setBoard(handleBoardClick(boardRef.current, { x: e.pageX, y: e.pageY }));
+    });
+
+    window.addEventListener('mouseup', e => {
+      setBoard(handleBoardMouseUp(boardRef.current, { x: e.pageX, y: e.pageY }));
+    });
+
+    window.addEventListener('mousedown', e => {
+      setBoard(handleBoardMouseDown(boardRef.current, { x: e.pageX, y: e.pageY }));
     });
 
     window.addEventListener('keyup', e => {
