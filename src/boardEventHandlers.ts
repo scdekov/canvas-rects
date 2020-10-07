@@ -62,8 +62,14 @@ const getCursorStyle = (board: Board, cursorLocation: Point): string => {
 
   const overlappedCorner = getOverlappedCorner(cursorLocation, selectedBox);
   if (overlappedCorner) {
-    return ['topLeft', 'bottomRight'].indexOf(overlappedCorner) >= 0 ? 'nwse-resize' : 'nesw-resize';
-  } else if (isInBox(cursorLocation, selectedBox)) return 'move';
+    if (['left', 'right'].includes(overlappedCorner)) return 'ew-resize';
+    if (['top', 'bottom'].includes(overlappedCorner)) return 'ns-resize';
+    if (['topLeft', 'bottomRight'].includes(overlappedCorner)) return 'nwse-resize';
+    if (['bottomLeft', 'topRight'].includes(overlappedCorner)) return 'nesw-resize';
+    throw Error('invalid overlapped corner');
+  }
+
+  if (isInBox(cursorLocation, selectedBox)) return 'move';
 
   return 'default';
 };
