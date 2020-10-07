@@ -61,11 +61,11 @@ export const handleBoardMouseDown = (board: Board, cursorLocation: Point): Board
   if (clickedBox === null || clickedBox.id !== board.selectedBoxId) return board;
 
   const selectedBox = getSelectedBox(board);
-  if (isInBoxCorners(cursorLocation, selectedBox)) {
-    // clicked on corner => start resizing
+  const clickedCorner = getOverlappedCorner(cursorLocation, selectedBox);
+  if (clickedCorner !== null) {
     return {
       ...board,
-      selectedBoxResizingCorner: getOverlappedCorner(cursorLocation, selectedBox)
+      selectedBoxResizingCorner: clickedCorner
     };
   } else {
     return {
