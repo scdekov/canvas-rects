@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Board, Point } from './types';
-import { moveBoxCorner, moveBox, getSelectedBox } from './utils';
+import { Board } from './types';
+import { getSelectedBox } from './utils';
 import { Drawer } from './Drawer';
 import { handleBoardClick, handleBoardMouseMove, handleDeleteKey } from './boardEventHandlers';
 

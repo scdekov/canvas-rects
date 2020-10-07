@@ -87,3 +87,10 @@ export const getSelectedBox = (board: Board): BoundingBox | null => {
   if (board.selectedBoxId === null) return null;
   return board.boxes.find(b => b.id === board.selectedBoxId);
 };
+
+export const getHoveredBox = (board: Board, cursorLocation: Point): BoundingBox | null => {
+  for (let box of board.boxes) {
+    if (isInBox(cursorLocation, box)) return box;
+  }
+  return null;
+};

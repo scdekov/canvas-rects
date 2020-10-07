@@ -1,5 +1,5 @@
 import { Board, BoundingBox, Point } from "./types";
-import { getOverlappedCorner, getSelectedBox, isInBox, isInBoxCorners, moveBox, moveBoxCorner, normalizeBoxCoords } from "./utils";
+import { getHoveredBox, getOverlappedCorner, getSelectedBox, isInBox, isInBoxCorners, moveBox, moveBoxCorner, normalizeBoxCoords } from "./utils";
 
 const getNewBox = (startPoint: Point): BoundingBox => ({
   id: JSON.stringify(new Date()),
@@ -53,10 +53,25 @@ export const handleBoardClick = (board: Board, clickPoint: Point): Board => {
   }
 };
 
-export const handleBoardMouseMove = (board: Board, movePoint: Point): Board => {
-  if (board.selectedBoxId === null) return board;
+const getCursorStyle = (board: Board, cursorLocation: Point): string => {
+  const selectedBox = getSelectedBox(board);
+  if (selectedBox === null) {
+    if (getHoveredBox(board, cursorLocation)) return 'pointer';
+    return 'default';
+  }
 
-  document.body.style.cursor = isInBox(movePoint, getSelectedBox(board)) ? 'move' : 'default';
+  const overlappedCorner = getOverlappedCorner(cursorLocation, selectedBox);
+  if (overlappedCorner) {
+    return ['topLeft', 'bottomRight'].indexOf(overlappedCorner) >= 0 ? 'nwse-resize' : 'nesw-resize';
+  } else if (isInBox(cursorLocation, selectedBox)) return 'move';
+
+  return 'default';
+};
+
+export const handleBoardMouseMove = (board: Board, movePoint: Point): Board => {
+  document.body.style.cursor = getCursorStyle(board, movePoint);
+
+  if (board.selectedBoxId === null) return board;
 
   if (board.selectedBoxResizingCorner !== null) {
     return {
