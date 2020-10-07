@@ -57,8 +57,8 @@ export const App: React.FC = () => {
       const selectedBox = getSelectedBox(board);
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath()
 
+      Drawer.drawGrid(ctx);
       if (selectedBox !== null) {
         Drawer.drawBox(ctx, selectedBox);
         Drawer.drawCorners(ctx, selectedBox);
