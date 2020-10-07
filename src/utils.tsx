@@ -1,12 +1,4 @@
-import { allowedNodeEnvironmentFlags } from "process";
-import { BoundingBox, Point } from "./types";
-
-interface Sides {
-  left: number,
-  right: number,
-  bottom: number,
-  top: number
-}
+import { BoundingBox, Point, Sides } from "./types";
 
 const getSides = (box: BoundingBox): Sides => {
   const [left, right] = [box.startX, box.startX + box.width].sort((a, b) => a - b);

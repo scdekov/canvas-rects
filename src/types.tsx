@@ -1,3 +1,10 @@
+export interface Sides {
+  left: number,
+  right: number,
+  bottom: number,
+  top: number
+}
+
 export interface Point {
   x: number,
   y: number

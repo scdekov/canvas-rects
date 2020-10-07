@@ -1,10 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import './App.css';
 import { Board, BoundingBox, Point } from './types';
 import { getOverlappedCorner, isInBox, isInBoxCorners, moveBoxCorner, normalizeBoxCoords, moveBox } from './utils';
 import { Drawer } from './Drawer';
-import { API_URL, SYNC_INTERVAL_SECONDS } from './constants';
-import { getBox, saveBox } from './api';
 
 const getNewBox = (startPoint: Point): BoundingBox => ({
   id: JSON.stringify(new Date()),
