@@ -58,7 +58,8 @@ export const App: React.FC = () => {
 
       Drawer.drawGrid(ctx);
       board.boxes.forEach(box => {
-        Drawer.drawBox(ctx, box);
+        const selected = box.id === board.selectedBoxId;
+        Drawer.drawBox(ctx, box, selected);
       });
     }
   }, [board]);

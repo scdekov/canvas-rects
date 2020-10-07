@@ -1,4 +1,4 @@
-import { CORNER_CIRCLE_RADIUS, GRID_COLOR, BOX_COLOR, BOX_FILL_COLOR } from "./constants";
+import { GRID_COLOR, BOX_COLOR, BOX_FILL_COLOR, SELECTED_BOX_COLOR } from "./constants";
 import { BoundingBox } from "./types";
 
 const usePath = (_: Object, __: string, descriptor: TypedPropertyDescriptor<any>): any => {
@@ -22,9 +22,9 @@ const prepareBoxForPainting = (box: BoundingBox) => {
 
 export class Drawer {
   @usePath
-  static drawBox(ctx: CanvasRenderingContext2D, box: BoundingBox) {
+  static drawBox(ctx: CanvasRenderingContext2D, box: BoundingBox, selected: boolean) {
     const preparedBox = prepareBoxForPainting(box);
-    ctx.strokeStyle = BOX_COLOR;
+    ctx.strokeStyle = selected ? SELECTED_BOX_COLOR : BOX_COLOR;
     ctx.fillStyle = BOX_FILL_COLOR;
     ctx.strokeRect(preparedBox.startX, preparedBox.startY, preparedBox.width, preparedBox.height);
     ctx.fillRect(preparedBox.startX, preparedBox.startY, preparedBox.width, preparedBox.height);
