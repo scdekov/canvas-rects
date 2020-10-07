@@ -3,10 +3,10 @@ import { getHoveredBox, getOverlappedCorner, getSelectedBox, isInBox, isInBoxCor
 
 const getNewBox = (startPoint: Point): BoundingBox => ({
   id: JSON.stringify(new Date()),
-  startX: startPoint.x,
-  startY: startPoint.y,
-  width: 0,
-  height: 0
+  startX: startPoint.x - 10,
+  startY: startPoint.y - 10,
+  width: 10,
+  height: 10
 });
 
 export const handleBoardClick = (board: Board, cursorLocation: Point): Board => {
