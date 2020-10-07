@@ -1,5 +1,13 @@
 import { Board, BoundingBox, Point } from "./types";
-import { getHoveredBox, getOverlappedCorner, getSelectedBox, isInBox, isInBoxCorners, moveBox, moveBoxCorner, normalizeBoxCoords } from "./utils";
+import {
+  getBoxUnderCursor,
+  getOverlappedCorner,
+  getSelectedBox,
+  isInBox,
+  moveBox,
+  moveBoxCorner,
+  normalizeBoxCoords
+} from "./utils";
 
 const getNewBox = (startPoint: Point): BoundingBox => ({
   id: JSON.stringify(new Date()),
@@ -18,7 +26,7 @@ export const handleBoardClick = (board: Board, cursorLocation: Point): Board => 
 };
 
 export const handleBoardMouseUp = (board: Board, cursorLocation: Point): Board => {
-  const clickedBox = board.boxes.find(box => isInBox(cursorLocation, box)) || null;
+  const clickedBox = getBoxUnderCursor(board, cursorLocation) || null;
   if (clickedBox === null) {
     return {
       ...board,
@@ -36,13 +44,14 @@ export const handleBoardMouseUp = (board: Board, cursorLocation: Point): Board =
   return {
     ...board,
     boxes: board.boxes.map(b => b.id === board.selectedBoxId ? normalizeBoxCoords(b) : b),
+    selectedBoxId: clickedBox.id,
     selectedBoxResizingCorner: null,
     selectedBoxMovingStart: null
   };
 };
 
 export const handleBoardMouseDown = (board: Board, cursorLocation: Point): Board => {
-  const clickedBox = board.boxes.find(box => isInBox(cursorLocation, box)) || null;
+  const clickedBox = getBoxUnderCursor(board, cursorLocation);
 
   if (board.selectedBoxId === null) {
     if (clickedBox === null ) {
@@ -78,7 +87,7 @@ export const handleBoardMouseDown = (board: Board, cursorLocation: Point): Board
 const getCursorStyle = (board: Board, cursorLocation: Point): string => {
   const selectedBox = getSelectedBox(board);
   if (selectedBox === null) {
-    if (getHoveredBox(board, cursorLocation)) return 'pointer';
+    if (getBoxUnderCursor(board, cursorLocation)) return 'pointer';
     return 'default';
   }
 

@@ -115,7 +115,12 @@ export const getSelectedBox = (board: Board): BoundingBox | null => {
   return board.boxes.find(b => b.id === board.selectedBoxId);
 };
 
-export const getHoveredBox = (board: Board, cursorLocation: Point): BoundingBox | null => {
+export const getBoxUnderCursor = (board: Board, cursorLocation: Point): BoundingBox | null => {
+  const selectedBox = getSelectedBox(board);
+
+  // selected box is always with priority
+  if (selectedBox !== null && isInBox(cursorLocation, selectedBox)) return selectedBox;
+
   for (let box of board.boxes) {
     if (isInBox(cursorLocation, box)) return box;
   }
