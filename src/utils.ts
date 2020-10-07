@@ -56,13 +56,14 @@ const stickBoxToGrid = (_: Object, __: string, descriptor: TypedPropertyDescript
   const originalMethod = descriptor.value;
   descriptor.value = (...args: any) => {
     let box = originalMethod(...args);
-    return {
+    let result = {
       ...box,
       startX: Math.round(box.startX / 10) * 10,
       startY: Math.round(box.startY / 10) * 10,
       width: Math.round(box.width / 10) * 10,
       height: Math.round(box.height / 10) * 10
     };
+    return result
   };
 };
 
