@@ -9,6 +9,7 @@ import {
   handleDeleteKey,
   spawnBox
 } from './boardEventHandlers';
+import { SAVE_STATE_INTERVAL_MS } from './constants';
 
 const EMPTY_BOARD: Board = {
   boxes: [],
@@ -16,6 +17,8 @@ const EMPTY_BOARD: Board = {
   selectedBoxMovingStart: null,
   selectedBoxResizingCorner: null
 }
+
+const BOARD_STATE_LOCAL_STORAGE_KEY = 'rects-board';
 
 export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -26,6 +29,13 @@ export const App: React.FC = () => {
     boardRef.current = b;
     _setBoard(b);
   };
+
+  useEffect(() => {
+    const existingBoard = localStorage.getItem(BOARD_STATE_LOCAL_STORAGE_KEY);
+    if (existingBoard !== null) {
+      setBoard(JSON.parse(existingBoard));
+    }
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -52,6 +62,12 @@ export const App: React.FC = () => {
       setBoard(handleBoardMouseMove(boardRef.current, { x: e.pageX, y: e.pageY }))
     })
   }, [])
+
+  useEffect(() => {
+    setInterval(() => {
+      localStorage.setItem(BOARD_STATE_LOCAL_STORAGE_KEY, JSON.stringify(boardRef.current));
+    }, SAVE_STATE_INTERVAL_MS)
+  }, []);
 
   useEffect(() => {
     if (!canvasRef.current) {
